@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -78,12 +79,54 @@ public class Timetable extends Application {
                 }
             }
         }
+
+        MFXButton updateButton = new MFXButton("Update");
+        updateButton.setPrefSize(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2);
+        updateButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: #FFFFFF;");
+        updateButton.setOnAction(e -> showUpdateScreen());
+        grid.add(updateButton, COLS + 1, 0);
+
         StackPane root = new StackPane();
         root.setStyle("-fx-background-color: #424242;");
         root.getChildren().add(grid);
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    public void showUpdateScreen() {
+        Stage updateStage = new Stage();
+        updateStage.setTitle("Update Timetable");
+
+        GridPane updateGrid = new GridPane();
+        updateGrid.setAlignment(Pos.CENTER);
+        updateGrid.setPadding(new Insets(PADDING));
+        updateGrid.setHgap(SPACING);
+        updateGrid.setVgap(SPACING);
+
+        TextArea textArea = new TextArea();
+        textArea.setPrefSize(400, 300);
+
+        MFXButton submitButton = new MFXButton("Submit");
+        setButtonStyle(submitButton);
+
+        submitButton.setOnAction(e -> {
+            parseText(textArea.getText());
+            updateStage.close();
+        });
+
+        updateGrid.add(textArea, 0, 0);
+        updateGrid.add(submitButton, 0, 1);
+
+        Scene updateScene = new Scene(updateGrid);
+
+        updateStage.setScene(updateScene);
+
+        updateStage.show();
+    }
+
+    public void parseText(String text) {
+        // TODO
     }
 
     private void setButtonStyle(MFXButton button, int buttonWidth) {
@@ -93,7 +136,7 @@ public class Timetable extends Application {
         button.setOnAction(e -> {
             MFXButton b = (MFXButton) e.getSource();
             String slot = b.getText();
-            if (!slot.equals("-")){
+            if (!slot.equals("-")) {
                 toggleSlot(slot);
             }
         });
@@ -116,6 +159,14 @@ public class Timetable extends Application {
                         toggleButton(child, slot);
                     }
                 } else {
+                    if (slot.matches("L\\d+")) {
+                        int slotNumber = Integer.parseInt(slot.substring(1));
+                        if (slotNumber % 2 != 0) {
+                            toggleButton(getNodeByCoordinate(i, j + 1), "L" + (slotNumber + 1));
+                        } else {
+                            toggleButton(getNodeByCoordinate(i, j - 1), "L" + (slotNumber - 1));
+                        }
+                    }
                     toggleButton(node, slot);
                 }
             }
