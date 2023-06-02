@@ -26,7 +26,7 @@ public class Timetable extends Application {
     private static final String LABEL_COLOR = "#FFFFFF";
     private final MFXButton[][] buttons = new MFXButton[ROWS][COLS];
     private final String[][] slots = {
-            {"A1/SA2", "G1", "E1", "TD1", "A2/SA2", "TB2/SB2", "E2", "C2/SC2", "-", "-"},
+            {"A1/SA1", "G1", "E1", "TD1", "A2/SA2", "TB2/SB2", "E2", "C2/SC2", "-", "-"},
             {"L1", "L2", "L3", "L4", "L21", "L22", "L23", "L24", "L25", "L26"},
             {"B1/SB1", "A1/SA1", "G1", "C1/SC1", "B2/SB2", "A2/SA2", "G2/STC2", "TD2", "-", "-"},
             {"L5", "L6", "L7", "L8", "L27", "L28", "L29", "L30", "L31", "L32"},
@@ -147,9 +147,7 @@ public class Timetable extends Application {
     }
 
     private void toggleSlot(String slot) {
-        if (slot.startsWith("T")) {
-            slot = slot.substring(1);
-        }
+        slot = slot.replace("T", "");
         for (int i = 1; i < ROWS + 1; i++) {
             for (int j = 1; j < COLS + 1; j++) {
                 Node node = getNodeByCoordinate(i, j);
@@ -175,7 +173,7 @@ public class Timetable extends Application {
 
     private void toggleButton(Node node, String slot) {
         if (node instanceof MFXButton button) {
-            String slotToCheck = button.getText().startsWith("T") ? button.getText().substring(1) : button.getText();
+            String slotToCheck = button.getText().replace("T", "");
             if (slotToCheck.equals(slot)) {
                 if (button.getStyle().equals("-fx-background-color: #2196F3; -fx-text-fill: #FFFFFF;")) {
                     button.setStyle("-fx-background-color: #FFC107; -fx-text-fill: #000000;");
