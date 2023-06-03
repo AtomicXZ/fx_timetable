@@ -28,7 +28,6 @@ public class Timetable extends Application {
     private static final int SPACING = 8;
     private static final int LABEL_FONT_SIZE = 20;
     private static final String LABEL_COLOR = "#FFFFFF";
-    private final MFXButton[][] buttons = new MFXButton[ROWS][COLS];
     private final String[][] slots = {
             {"A1/SA1", "G1", "E1", "TD1", "A2/SA2", "TB2/SB2", "E2", "C2/SC2", "-", "-"},
             {"L1", "L2", "L3", "L4", "L21", "L22", "L23", "L24", "L25", "L26"},
@@ -88,9 +87,9 @@ public class Timetable extends Application {
                     HBox hbox = new HBox(button1, button2);
                     grid.add(hbox, j + 1, i + 1);
                 } else {
-                    buttons[i][j] = new MFXButton(slots[i][j]);
-                    setSlotButtonStyleAndAction(buttons[i][j]);
-                    grid.add(buttons[i][j], j + 1, i + 1);
+                    MFXButton button = new MFXButton(slots[i][j]);
+                    setSlotButtonStyleAndAction(button);
+                    grid.add(button, j + 1, i + 1);
                 }
             }
         }
