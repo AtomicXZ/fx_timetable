@@ -13,7 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class Timetable extends Application {
     private static final int ROWS = 10;
@@ -50,6 +53,17 @@ public class Timetable extends Application {
         grid.setPadding(new Insets(PADDING));
         grid.setHgap(SPACING);
         grid.setVgap(SPACING);
+        populateGrid();
+        StackPane root = new StackPane();
+        root.setStyle("-fx-background-color: #424242;");
+        root.getChildren().add(grid);
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void populateGrid() {
+        grid.getChildren().clear();
         Label[] time = {new Label("09:00 - 09:50"), new Label("10:00 - 10:50"), new Label("11:00 - 11:50"), new Label("12:00 - 12:50"), new Label("14:00 - 14:50"), new Label("15:00 - 15:50"), new Label("16:00 - 16:50"), new Label("17:00 - 17:50"), new Label("18:00 - 18:50"), new Label("19:00 - 19:50")};
         Label[] days = {new Label("Tuesday"), new Label("Tuesday Lab"), new Label("Wednesday"), new Label("Wednesday Lab"), new Label("Thursday"), new Label("Thursday Lab"), new Label("Friday"), new Label("Friday Lab"), new Label("Saturday"), new Label("Saturday Lab")};
         for (int i = 0; i < time.length; i++) {
@@ -82,16 +96,9 @@ public class Timetable extends Application {
 
         MFXButton updateButton = new MFXButton("Update");
         updateButton.setPrefSize(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2);
-        updateButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: #FFFFFF;");
+        updateButton.setStyle("-fx-background-color: #bc91f1; -fx-text-fill: #000000;");
         updateButton.setOnAction(e -> showUpdateScreen());
         grid.add(updateButton, COLS + 1, 0);
-
-        StackPane root = new StackPane();
-        root.setStyle("-fx-background-color: #424242;");
-        root.getChildren().add(grid);
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
     public void showUpdateScreen() {
@@ -112,6 +119,7 @@ public class Timetable extends Application {
 
         submitButton.setOnAction(e -> {
             parseText(textArea.getText());
+            populateGrid();
             updateStage.close();
         });
 
@@ -125,8 +133,43 @@ public class Timetable extends Application {
         updateStage.show();
     }
 
-    public void parseText(String text) {
-        // TODO
+    public void parseText(String tt) {
+        Scanner text = new Scanner(tt);
+
+        //skipping time data
+        text.nextLine();
+        text.nextLine();
+        text.nextLine();
+        text.nextLine();
+
+        int row = 0;
+        while (text.hasNext()) {
+            ArrayList<String> currentLine = new ArrayList<>(Arrays.asList(text.nextLine().split("\t")));
+            ArrayList<String> newList = new ArrayList<>();
+            for (String curElem : currentLine) {
+                if (curElem.contains("-") && curElem.length() > 3) {
+                    String[] slots = curElem.split("-");
+                    newList.add(slots[0]);
+                } else if (curElem.matches("[A-z]+\\d+") || curElem.equals("-")){
+                    newList.add(curElem);
+                }
+            }
+            currentLine = new ArrayList<>(newList);
+
+            newList.clear();
+            for (int i = 0; i < currentLine.size(); i+= 2) {
+                if (currentLine.get(i).contains("L")) {
+                    newList.add(currentLine.get(i));
+                } else if (currentLine.get(i+1).equals("-")) {
+                    newList.add(currentLine.get(i));
+                } else {
+                    newList.add(currentLine.get(i) + "/" + currentLine.get(i+1));
+                }
+            }
+
+            slots[row] = newList.toArray(new String[0]);
+            row ++;
+        }
     }
 
     private void setButtonStyle(MFXButton button, int buttonWidth) {
