@@ -148,27 +148,26 @@ public class Timetable extends Application {
             ArrayList<String> newList = new ArrayList<>();
             for (String curElem : currentLine) {
                 if (curElem.contains("-") && curElem.length() > 3) {
-                    String[] slots = curElem.split("-");
-                    newList.add(slots[0]);
-                } else if (curElem.matches("[A-z]+\\d+") || curElem.equals("-")){
+                    newList.add(curElem.split("-")[0]);
+                } else if (curElem.matches("[A-z]+\\d+") || curElem.equals("-")) {
                     newList.add(curElem);
                 }
             }
             currentLine = new ArrayList<>(newList);
 
             newList.clear();
-            for (int i = 0; i < currentLine.size(); i+= 2) {
+            for (int i = 0; i < currentLine.size(); i += 2) {
                 if (currentLine.get(i).contains("L")) {
                     newList.add(currentLine.get(i));
-                } else if (currentLine.get(i+1).equals("-")) {
+                } else if (currentLine.get(i + 1).equals("-")) {
                     newList.add(currentLine.get(i));
                 } else {
-                    newList.add(currentLine.get(i) + "/" + currentLine.get(i+1));
+                    newList.add(currentLine.get(i) + "/" + currentLine.get(i + 1));
                 }
             }
 
             slots[row] = newList.toArray(new String[0]);
-            row ++;
+            row++;
         }
     }
 
