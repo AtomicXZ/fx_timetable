@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
@@ -21,8 +22,8 @@ import java.util.Scanner;
 public class Timetable extends Application {
     private static final int ROWS = 10;
     private static final int COLS = 10;
-    private static final int BUTTON_WIDTH = 120;
-    private static final int BUTTON_HEIGHT = 50;
+    private static final float BUTTON_WIDTH = 120F;
+    private static final float BUTTON_HEIGHT = 50F;
     private static final int PADDING = 10;
     private static final int SPACING = 8;
     private static final int LABEL_FONT_SIZE = 20;
@@ -81,22 +82,21 @@ public class Timetable extends Application {
                     String[] parts = slots[i][j].split("/");
                     MFXButton button1 = new MFXButton(parts[0]);
                     MFXButton button2 = new MFXButton(parts[1]);
-                    setButtonStyle(button1, BUTTON_WIDTH / 2);
-                    setButtonStyle(button2, BUTTON_WIDTH / 2);
+                    setSlotButtonStyleAndAction(button1, BUTTON_WIDTH / 2);
+                    setSlotButtonStyleAndAction(button2, BUTTON_WIDTH / 2);
 
                     HBox hbox = new HBox(button1, button2);
                     grid.add(hbox, j + 1, i + 1);
                 } else {
                     buttons[i][j] = new MFXButton(slots[i][j]);
-                    setButtonStyle(buttons[i][j]);
+                    setSlotButtonStyleAndAction(buttons[i][j]);
                     grid.add(buttons[i][j], j + 1, i + 1);
                 }
             }
         }
 
         MFXButton updateButton = new MFXButton("Update");
-        updateButton.setPrefSize(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2);
-        updateButton.setStyle("-fx-background-color: #bc91f1; -fx-text-fill: #000000;");
+        setUtilityButtonStyle(updateButton);
         updateButton.setOnAction(e -> showUpdateScreen());
         grid.add(updateButton, COLS + 1, 0);
     }
@@ -114,17 +114,25 @@ public class Timetable extends Application {
         TextArea textArea = new TextArea();
         textArea.setPrefSize(400, 300);
 
+        CheckBox checkbox = new CheckBox("✔ VTOP format | ⬜ Annexure format");
+        checkbox.setSelected(true);
+
         MFXButton submitButton = new MFXButton("Submit");
-        setButtonStyle(submitButton);
+        setUtilityButtonStyle(submitButton);
 
         submitButton.setOnAction(e -> {
-            parseText(textArea.getText());
+            if (checkbox.isSelected()) parseVtopData(textArea.getText());
+            else parseAnnexureData(textArea.getText());
             populateGrid();
             updateStage.close();
         });
 
+        HBox submitAndCheck = new HBox(submitButton, checkbox);
+        submitAndCheck.setSpacing(10);
+        submitAndCheck.setAlignment(Pos.BOTTOM_LEFT);
+
         updateGrid.add(textArea, 0, 0);
-        updateGrid.add(submitButton, 0, 1);
+        updateGrid.add(submitAndCheck, 0, 1);
 
         Scene updateScene = new Scene(updateGrid);
 
@@ -133,7 +141,21 @@ public class Timetable extends Application {
         updateStage.show();
     }
 
-    public void parseText(String tt) {
+    private void parseAnnexureData(String tt) {
+        Scanner text = new Scanner(tt);
+
+        int row = 0;
+        while (text.hasNextLine()) {
+            ArrayList<String> currentLine = new ArrayList<>(Arrays.asList(text.nextLine().split(" ")));
+            currentLine.removeIf(elem -> (!elem.matches("([A-z]+\\d+)(/[A-z]+\\d+)?")));
+            if (currentLine.isEmpty()) continue;
+            while (currentLine.size() < 10) currentLine.add("-");
+            slots[row] = currentLine.toArray(new String[0]);
+            row++;
+        }
+    }
+
+    private void parseVtopData(String tt) {
         Scanner text = new Scanner(tt);
 
         //skipping time data
@@ -171,7 +193,7 @@ public class Timetable extends Application {
         }
     }
 
-    private void setButtonStyle(MFXButton button, int buttonWidth) {
+    private void setSlotButtonStyleAndAction(MFXButton button, float buttonWidth) {
         button.setPrefSize(buttonWidth, BUTTON_HEIGHT);
         button.setStyle("-fx-background-color: #2196F3; -fx-text-fill: #FFFFFF;");
 
@@ -184,8 +206,13 @@ public class Timetable extends Application {
         });
     }
 
-    private void setButtonStyle(MFXButton button) {
-        this.setButtonStyle(button, BUTTON_WIDTH);
+    private void setSlotButtonStyleAndAction(MFXButton button) {
+        this.setSlotButtonStyleAndAction(button, BUTTON_WIDTH);
+    }
+
+    private void setUtilityButtonStyle(MFXButton button) {
+        button.setPrefSize(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2);
+        button.setStyle("-fx-background-color: #bc91f1; -fx-text-fill: #000000;");
     }
 
     private void toggleSlot(String slot) {
